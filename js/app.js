@@ -13,7 +13,8 @@
   var S = {
     dati: null, errore: null, me: leggiLocale('bv-io'), mese: null, wk: null, orariAperti: {},
     salvataggio: '', pendenti: {}, inviando: false, timer: null,
-    pin: leggiSessione('bv-pin'), tab: 'date', slotAdmin: null, sposta: false, campoEdit: null, meseAdmin: null
+    pin: leggiSessione('bv-pin'), tab: 'date', slotAdmin: null, sposta: false, campoEdit: null, meseAdmin: null,
+    info: !!(leggiLocale('bv-io') && !leggiLocale('bv-info-vista'))
   };
 
   // ---------- Utilità ----------
@@ -98,13 +99,12 @@
     if (nuovo.ruolo !== 'gioco') { nuovo.dalle = null; nuovo.alle = null; }
     if (!nuovo.ruolo || nuovo.ruolo === 'no') nuovo.acc = 0;
     S.pendenti[slot] = nuovo;
-    S.salvataggio = 'attesa';
-    clearTimeout(S.timer);
-    S.timer = setTimeout(invia, 700);
+    // Le risposte partono solo quando si preme Conferma.
+    S.salvataggio = 'bozza';
     render();
   }
   function invia() {
-    if (S.inviando) { S.timer = setTimeout(invia, 400); return; }
+    if (S.inviando) return;
     var lotto = S.pendenti;
     var slots = Object.keys(lotto);
     if (!slots.length) return;
@@ -117,11 +117,13 @@
       slots.forEach(function (s) { if (S.pendenti[s] === lotto[s]) delete S.pendenti[s]; });
       var rif = r.rifiutate || [];
       rif.forEach(function (s) { delete S.pendenti[s]; });
-      S.salvataggio = Object.keys(S.pendenti).length ? 'attesa' : 'salvato';
+      S.salvataggio = Object.keys(S.pendenti).length ? 'bozza' : 'salvato';
+      if (!rif.length) toast('Risposte inviate, grazie!');
       if (rif.length) toast('Iscrizioni chiuse per ' + rif.map(function (s) { return L.etichettaGiorno(L.dataDiSlot(s)); }).join(', ') + ': risposta non salvata');
       render();
     }).catch(function () {
       S.inviando = false; S.salvataggio = 'errore'; render();
+      toast('Invio non riuscito: controlla la connessione e premi di nuovo Conferma');
     });
   }
 
@@ -150,7 +152,9 @@
     if (p.vista === 'weekend') html = vistaWeekend();
     else if (p.vista === 'data') html = vistaData(p.arg);
     else html = vistaDisponibilita(p.arg);
-    $app.innerHTML = (api.prova ? '<div class="avviso" style="border-radius:0">Versione di prova: i dati restano solo su questo telefono.</div>' : '') + html;
+    $app.innerHTML = (api.prova ? '<div class="avviso" style="border-radius:0">Versione di prova: i dati restano solo su questo telefono.</div>' : '') + html + (S.info ? vistaInfo() : '');
+    var chiudi = S.info && $app.querySelector('.info-foglio [data-a="chiudiInfo"]');
+    if (chiudi && document.activeElement === document.body) chiudi.focus();
   }
 
   function vistaCaricamento() { return '<div class="caricamento">' + I.pallaGira + '<span>Carico le partite…</span></div>'; }
@@ -158,10 +162,35 @@
     return '<div class="caricamento"><strong>Non riesco a caricare i dati.</strong><span>' + esc(S.errore) + '</span><button class="btn pieno" data-a="riprova">Riprova</button></div>';
   }
 
+  function barraConferma() {
+    var n = Object.keys(S.pendenti).length;
+    if (!n && !S.inviando) return '';
+    return '<div class="conferma" role="region" aria-label="Risposte da inviare"><span>' +
+      (S.inviando ? 'Invio in corso…' : S.salvataggio === 'errore' ? '<strong>Non inviato.</strong> Riprova' : '<strong>' + (n === 1 ? '1 modifica' : n + ' modifiche') + '</strong> da inviare') + '</span>' +
+      '<button class="btn arancio" data-a="conferma"' + (S.inviando ? ' disabled' : '') + '>' + I.check + 'Conferma</button></div>';
+  }
   function barra(attiva) {
-    return '<nav class="barra" aria-label="Sezioni">' +
+    return '<div class="piede">' + barraConferma() + '<nav class="barra" aria-label="Sezioni">' +
       '<a href="#disponibilita"' + (attiva === 'd' ? ' aria-current="page"' : '') + '>' + I.lista + 'Disponibilità</a>' +
-      '<a href="#weekend"' + (attiva === 'w' ? ' aria-current="page"' : '') + '>' + I.cal + 'Weekend</a></nav>';
+      '<a href="#weekend"' + (attiva === 'w' ? ' aria-current="page"' : '') + '>' + I.cal + 'Weekend</a></nav></div>';
+  }
+
+  function bottoneInfo() {
+    return '<button class="btn-info" data-a="info" aria-label="Come funziona"><span aria-hidden="true">i</span>Come funziona</button>';
+  }
+  function vistaInfo() {
+    var passi = [
+      ['Segna quando ci sei', 'Per ogni weekend scegli <b>Gioco</b>, <b>Guardo</b>, <b>Post</b> (vieni solo al post-partita) o <b>No</b>. Se giochi puoi indicare l’orario in cui ci sei.'],
+      ['Premi Conferma', 'Le scelte partono solo quando premi il tasto arancione <b>Conferma</b> in basso. Puoi cambiare idea quando vuoi, fino a due giorni prima della data.'],
+      ['Si gioca da 6 in su', 'Quando una data arriva ad almeno 6 giocatori diventa arancione nella sezione <b>Weekend</b>: lì trovi chi c’è, le squadre proposte e il campo.'],
+      ['Dettagli nel gruppo', 'Gli orari sono indicativi: orario preciso e campo li conferma l’organizzatore, anche nel gruppo WhatsApp.']
+    ];
+    return '<div class="info-velo" data-a="chiudiInfo"></div><section class="info-foglio" role="dialog" aria-modal="true" aria-labelledby="info-titolo">' +
+      '<div class="riga"><h2 id="info-titolo" class="h-display">Come funziona</h2><button class="tondo" aria-label="Chiudi" data-a="chiudiInfo">×</button></div>' +
+      '<ol class="info-passi">' + passi.map(function (p, i) { return '<li><span class="info-n">' + (i + 1) + '</span><span><strong>' + p[0] + '</strong><br>' + p[1] + '</span></li>'; }).join('') + '</ol>' +
+      '<p class="piccolo" style="margin:0">Chiediamo solo nome e cognome, visibili ai colleghi: niente mail né telefono. Per averla come un’app: menu del browser → <b>Aggiungi a schermata Home</b>.</p>' +
+      '<button class="btn arancio largo" data-a="chiudiInfo">Ho capito</button>' +
+      '<button class="btn largo" style="border:0;min-height:40px;font-size:14px" data-a="esci">Non sei ' + esc(S.me ? S.me.nome : '') + '? Cambia nome</button></section>';
   }
 
   function vistaBenvenuto() {
@@ -207,7 +236,7 @@
     }).join('');
 
     var apertiTutti = w.giorni.some(function (g) { return L.slotDi(g).some(function (s) { return riep(s).aperte; }); });
-    var stato = { attesa: 'Modifiche in corso…', invio: 'Salvo…', salvato: I.check + 'Salvato', errore: 'Non salvato' }[S.salvataggio] || '';
+    var stato = { bozza: 'Da confermare', invio: 'Invio…', salvato: I.check + 'Inviato', errore: 'Non inviato' }[S.salvataggio] || '';
 
     var giorni = w.giorni.map(function (g) { return cardGiorno(g); }).join('');
     var d1 = L.parse(w.giorni[0]), d2 = L.parse(w.giorni[1]);
@@ -216,7 +245,7 @@
     return '<header class="testata arancio">' + I.palla +
       '<div class="riga" style="position:relative"><span class="occhiello">' + esc(L.nomeMese(S.mese)) + ' ' + S.mese.slice(0, 4) + '</span>' + navMese(S.mese, lim.min, lim.max, 'mese', '#FFF8EE') + '</div>' +
       '<h1 class="titolo">Beach volley<br>tra colleghi</h1>' +
-      '<div class="riga-testata"><span>Ciao, <strong>' + esc(L.nomeCompleto(S.me)) + '</strong></span><button class="link" style="background:none;border:0;min-height:44px;padding:0;text-decoration:underline" data-a="esci">Non sei tu?</button></div></header>' +
+      '<div class="riga-testata"><span>Ciao, <strong>' + esc(L.nomeCompleto(S.me)) + '</strong></span>' + bottoneInfo() + '</div></header>' +
       onda('#E8572A') +
       '<main><div class="weekend-chips">' + chips + '</div>' +
       '<div class="riga"><h2 class="h2">' + esc(titoloWk) + '</h2><span class="salvato' + (S.salvataggio === 'errore' ? ' errore' : '') + '" role="status">' + stato + (S.salvataggio === 'errore' ? ' <button class="btn mini" data-a="reinvia">Riprova</button>' : '') + '</span></div>' +
@@ -290,7 +319,7 @@
     var schede = wks.map(schedaWeekend).join('');
     return '<header class="testata mare">' + I.palla + '<div class="occhiello">Le partite</div>' +
       '<div class="riga" style="align-items:flex-end;position:relative"><h1 class="titolo">I weekend<br>di ' + esc(L.nomeMese(S.mese)) + '</h1>' + navMese(S.mese, lim.min, lim.max, 'mese', '#FFF8EE') + '</div>' +
-      '<div class="pills"><span class="pill piena">' + (conf ? plur(conf, 'partita confermata', 'partite confermate') : 'Nessuna partita ancora confermata') + '</span>' +
+      '<div class="pills">' + bottoneInfo() + '<span class="pill piena">' + (conf ? plur(conf, 'partita confermata', 'partite confermate') : 'Nessuna partita ancora confermata') + '</span>' +
       (daFare ? '<a class="pill vuota" href="#disponibilita" style="text-decoration:none">Ti ' + (daFare === 1 ? 'manca 1 weekend' : 'mancano ' + daFare + ' weekend') + '</a>' : '') + '</div>' +
       rete() + '</header><main style="padding-top:14px">' + schede + '<a href="#admin" class="piccolo" style="text-align:center;padding:8px">Area organizzatore</a></main>' + barra('w');
   }
@@ -622,7 +651,10 @@
   var A = {
     riprova: function () { S.errore = null; render(); carica(); },
     reinvia: function () { invia(); },
-    esci: function () { if (confirm('Vuoi cambiare nome? Le risposte già date restano salvate.')) { S.me = null; scriviLocale('bv-io', null); S.pendenti = {}; render(); } },
+    conferma: function () { invia(); },
+    info: function () { S.info = true; render(); },
+    chiudiInfo: function () { S.info = false; scriviLocale('bv-info-vista', true); render(); },
+    esci: function () { if (confirm('Vuoi cambiare nome? Le risposte già inviate restano salvate.')) { S.me = null; S.info = false; scriviLocale('bv-io', null); S.pendenti = {}; render(); } },
     mese: function (d) { S.mese = L.addMesi(S.mese, +d.v); S.wk = null; if (percorso().arg) vai('#' + percorso().vista); else render(); },
     wk: function (d) { S.wk = d.v; vai('#disponibilita/' + d.v); },
     ruolo: function (d) { modifica(d.s, { ruolo: d.v }); },
@@ -630,7 +662,7 @@
     tutto: function (d) {
       var w = L.weekendDelMese(L.meseDi(d.v)).filter(function (x) { return x.id === d.v; })[0];
       w.giorni.forEach(function (g) { L.slotDi(g).forEach(function (s) { if (riep(s).aperte) modifica(s, { ruolo: 'gioco' }); }); });
-      toast('Segnato: giochi in tutte le fasce aperte');
+      toast('Segnato: ora premi Conferma per inviare');
     },
     acc: function (d) {
       L.slotDi(d.g).forEach(function (s) {
@@ -694,6 +726,7 @@
       if (!nome || !cognome) return;
       S.me = { nome: L.maiuscola(nome), cognome: L.maiuscola(cognome) };
       scriviLocale('bv-io', S.me);
+      if (!leggiLocale('bv-info-vista')) S.info = true;
       render();
       if (!S.dati) carica();
     },
@@ -724,6 +757,11 @@
     var f = e.target.closest('[data-f]');
     if (f && F[f.dataset.f]) { e.preventDefault(); F[f.dataset.f](f); }
   });
+  // Avviso se si chiude l'app con risposte non ancora confermate.
+  window.addEventListener('beforeunload', function (e) {
+    if (Object.keys(S.pendenti).length) { e.preventDefault(); e.returnValue = ''; }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.info) A.chiudiInfo(); });
   window.addEventListener('hashchange', function () { S.sposta = false; render(); window.scrollTo(0, 0); });
 
   // Aggiorno i dati ogni minuto quando l'app è in primo piano, così si vedono le risposte degli altri.
