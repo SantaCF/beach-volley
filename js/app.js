@@ -202,10 +202,10 @@
   function bloccoInstalla() {
     if (installata()) return '';
     if (invitoInstalla) return '<button class="btn largo" data-a="installa">Aggiungi l’app alla schermata Home</button>';
-    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    return '<div class="card stretta" style="background:var(--sabbia)"><strong>Tienila come un’app</strong><span class="piccolo">' +
-      (ios ? 'Apri il link con Safari, tocca il tasto <b>Condividi</b> (quadrato con la freccia) e poi <b>Aggiungi alla schermata Home</b>.'
-           : 'Apri il link con <b>Chrome</b>, tocca i tre puntini in alto e scegli <b>Installa e crea scorciatoia</b> (su alcuni telefoni si chiama <b>Aggiungi a schermata Home</b> o <b>Installa app</b>).') + '</span></div>';
+    // Mostro sempre entrambe le istruzioni: chi legge può avere un telefono diverso da chi gli ha passato il link.
+    return '<div class="card stretta" style="background:var(--sabbia)"><strong>Tienila come un’app</strong>' +
+      '<span class="piccolo"><b>Android (Chrome):</b> tocca i tre puntini in alto e scegli <b>Installa e crea scorciatoia</b> (su alcuni telefoni si chiama <b>Aggiungi a schermata Home</b> o <b>Installa app</b>).</span>' +
+      '<span class="piccolo"><b>iPhone (Safari):</b> tocca il tasto <b>Condividi</b> (il quadrato con la freccia in su), poi <b>Aggiungi alla schermata Home</b> e <b>Aggiungi</b>. Va fatto da Safari, non da Chrome.</span></div>';
   }
 
   function vistaBenvenuto() {
