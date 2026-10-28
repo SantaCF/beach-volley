@@ -698,7 +698,7 @@
       if (!S.dati) carica();
     },
     pin: function (f) {
-      var pin = f.pin.value;
+      var pin = f.pin.value.trim();
       api.admin(pin, 'verifica').then(function () {
         S.pin = pin; scriviSessione('bv-pin', pin);
         if (!S.dati) carica(); else render();
