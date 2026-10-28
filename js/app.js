@@ -180,17 +180,32 @@
   }
   function vistaInfo() {
     var passi = [
-      ['Segna quando ci sei', 'Per ogni weekend scegli <b>Gioco</b>, <b>Guardo</b>, <b>Post</b> (vieni solo al post-partita) o <b>No</b>. Se giochi puoi indicare l’orario in cui ci sei.'],
+      ['Segna quando ci sei', 'Per ogni weekend scegli <b>Gioco</b>, <b>Guardo</b>, <b>Post</b> (vieni solo al post-partita) o <b>No</b>.'],
+      ['L’orario è indicativo', 'Se giochi ti proponiamo una fascia di massima: mattina 10–13, pomeriggio 15–18. Se puoi solo in certe ore tocca <b>Cambia orario</b> e indica dalle/alle: l’organizzatore vede gli orari di tutti e sceglie quello che va bene ai più.'],
       ['Premi Conferma', 'Le scelte partono solo quando premi il tasto arancione <b>Conferma</b> in basso. Puoi cambiare idea quando vuoi, fino a due giorni prima della data.'],
       ['Si gioca da 6 in su', 'Quando una data arriva ad almeno 6 giocatori diventa arancione nella sezione <b>Weekend</b>: lì trovi chi c’è, le squadre proposte e il campo.'],
-      ['Dettagli nel gruppo', 'Gli orari sono indicativi: orario preciso e campo li conferma l’organizzatore, anche nel gruppo WhatsApp.']
+      ['Conferme nel gruppo', 'Orario definitivo e campo li conferma l’organizzatore: li vedi nella data e arrivano anche nel gruppo WhatsApp.']
     ];
     return '<div class="info-velo" data-a="chiudiInfo"></div><section class="info-foglio" role="dialog" aria-modal="true" aria-labelledby="info-titolo">' +
       '<div class="riga"><h2 id="info-titolo" class="h-display">Come funziona</h2><button class="tondo" aria-label="Chiudi" data-a="chiudiInfo">×</button></div>' +
       '<ol class="info-passi">' + passi.map(function (p, i) { return '<li><span class="info-n">' + (i + 1) + '</span><span><strong>' + p[0] + '</strong><br>' + p[1] + '</span></li>'; }).join('') + '</ol>' +
-      '<p class="piccolo" style="margin:0">Chiediamo solo nome e cognome, visibili ai colleghi: niente mail né telefono. Per averla come un’app: menu del browser → <b>Aggiungi a schermata Home</b>.</p>' +
+      '<p class="piccolo" style="margin:0">Chiediamo solo nome e cognome, visibili ai colleghi: niente mail né telefono.</p>' +
+      bloccoInstalla() +
       '<button class="btn arancio largo" data-a="chiudiInfo">Ho capito</button>' +
       '<button class="btn largo" style="border:0;min-height:40px;font-size:14px" data-a="esci">Non sei ' + esc(S.me ? S.me.nome : '') + '? Cambia nome</button></section>';
+  }
+
+  // Su Android (Chrome, Edge, Samsung) il browser permette di installare l'app con un tasto.
+  var invitoInstalla = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); invitoInstalla = e; if (S.info) render(); });
+  function installata() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+  function bloccoInstalla() {
+    if (installata()) return '';
+    if (invitoInstalla) return '<button class="btn largo" data-a="installa">Aggiungi l’app alla schermata Home</button>';
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    return '<div class="card stretta" style="background:var(--sabbia)"><strong>Tienila come un’app</strong><span class="piccolo">' +
+      (ios ? 'Apri il link con Safari, tocca il tasto <b>Condividi</b> (quadrato con la freccia) e poi <b>Aggiungi alla schermata Home</b>.'
+           : 'Apri il link con <b>Chrome</b>, tocca i tre puntini in alto e scegli <b>Aggiungi a schermata Home</b> oppure <b>Installa app</b>. Se non la trovi, il tuo browser non lo permette: usa Chrome.') + '</span></div>';
   }
 
   function vistaBenvenuto() {
@@ -653,6 +668,11 @@
     reinvia: function () { invia(); },
     conferma: function () { invia(); },
     info: function () { S.info = true; render(); },
+    installa: function () {
+      if (!invitoInstalla) return;
+      invitoInstalla.prompt();
+      invitoInstalla.userChoice.then(function () { invitoInstalla = null; render(); });
+    },
     chiudiInfo: function () { S.info = false; scriviLocale('bv-info-vista', true); render(); },
     esci: function () { if (confirm('Vuoi cambiare nome? Le risposte già inviate restano salvate.')) { S.me = null; S.info = false; scriviLocale('bv-io', null); S.pendenti = {}; render(); } },
     mese: function (d) { S.mese = L.addMesi(S.mese, +d.v); S.wk = null; if (percorso().arg) vai('#' + percorso().vista); else render(); },
