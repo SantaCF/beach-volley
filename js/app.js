@@ -205,7 +205,7 @@
     var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     return '<div class="card stretta" style="background:var(--sabbia)"><strong>Tienila come un’app</strong><span class="piccolo">' +
       (ios ? 'Apri il link con Safari, tocca il tasto <b>Condividi</b> (quadrato con la freccia) e poi <b>Aggiungi alla schermata Home</b>.'
-           : 'Apri il link con <b>Chrome</b>, tocca i tre puntini in alto e scegli <b>Aggiungi a schermata Home</b> oppure <b>Installa app</b>. Se non la trovi, il tuo browser non lo permette: usa Chrome.') + '</span></div>';
+           : 'Apri il link con <b>Chrome</b>, tocca i tre puntini in alto e scegli <b>Installa e crea scorciatoia</b> (su alcuni telefoni si chiama <b>Aggiungi a schermata Home</b> o <b>Installa app</b>).') + '</span></div>';
   }
 
   function vistaBenvenuto() {
