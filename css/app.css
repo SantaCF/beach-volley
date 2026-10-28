@@ -167,7 +167,8 @@ main { flex: 1; padding: 4px 16px 24px; display: flex; flex-direction: column; g
 .ore-assi span { flex: 1; text-align: center; font-size: 11px; color: var(--grigio); }
 
 /* ---- Barra in basso ---- */
-.barra { position: sticky; bottom: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--carta); border-top: 1px solid var(--sabbia-2); z-index: 5; }
+.piede { position: sticky; bottom: 0; z-index: 5; }
+.barra { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--carta); border-top: 1px solid var(--sabbia-2); z-index: 5; }
 .barra a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 14px; color: var(--inchiostro); text-decoration: none; font-weight: 700; font-size: 14px; }
 .barra a[aria-current="page"] { background: var(--inchiostro); color: var(--crema); }
 
@@ -227,3 +228,17 @@ body.in-admin { background: var(--notte); }
 .lista .voce .c span { font-size: 12px; color: #C9BBA5; }
 .btn.mini { min-height: 40px; padding: 0 12px; font-size: 13px; border-radius: 10px; }
 .admin .orario, .admin .turni li .n { color: #C9BBA5; }
+
+/* ---- Conferma delle risposte ---- */
+.conferma { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: #FFE3D3; border-top: 2px solid var(--arancio); font-size: 14px; }
+.conferma .btn { min-height: 48px; padding: 0 20px; font-size: 16px; }
+
+/* ---- Come funziona ---- */
+.btn-info { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px 0 6px; border-radius: 999px; border: 2px solid var(--crema); background: rgba(255,248,238,.15); color: var(--crema); font-weight: 700; font-size: 13px; }
+.btn-info span { width: 26px; height: 26px; border-radius: 13px; background: var(--crema); color: var(--arancio-testo); display: inline-flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-style: italic; font-weight: 700; font-size: 16px; }
+.testata.mare .btn-info span { color: var(--mare); }
+.info-velo { position: fixed; inset: 0; background: rgba(20,35,43,.55); z-index: 30; }
+.info-foglio { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; background: var(--carta); border-radius: 24px 24px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); z-index: 31; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,.2); }
+.info-passi { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.info-passi li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+.info-n { flex: 0 0 32px; height: 32px; border-radius: 16px; background: var(--arancio); color: #fff; font-family: var(--display); font-size: 18px; display: flex; align-items: center; justify-content: center; }
