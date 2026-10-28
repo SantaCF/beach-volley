@@ -179,9 +179,11 @@ function admin(body) {
   const cache = CacheService.getScriptCache();
   const tentativi = +(cache.get('pin-errati') || 0);
   if (tentativi >= 10) return { ok: false, errore: 'Troppi PIN sbagliati, riprova tra 10 minuti' };
-  if (PIN_ADMIN === 'CAMBIAMI' || String(body.pin) !== PIN_ADMIN) {
+  // Accetta il PIN scritto con o senza virgolette e ignora gli spazi.
+  const pin = String(PIN_ADMIN).trim();
+  if (pin === 'CAMBIAMI' || String(body.pin).trim() !== pin) {
     cache.put('pin-errati', String(tentativi + 1), 600);
-    return { ok: false, errore: PIN_ADMIN === 'CAMBIAMI' ? 'Imposta prima il PIN nello script' : 'PIN errato' };
+    return { ok: false, errore: pin === 'CAMBIAMI' ? 'Imposta prima il PIN nello script' : 'PIN errato' };
   }
   const d = body.dati || {};
   switch (body.op) {
