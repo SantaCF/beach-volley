@@ -1,5 +1,5 @@
 /* Tiene in memoria la grafica dell'app così si apre subito; i dati arrivano sempre freschi dalla rete. */
-const VERSIONE = 'bv-v6';
+const VERSIONE = 'bv-v7';
 const FILE = ['./', 'index.html', 'css/app.css', 'js/config.js', 'js/logic.js', 'js/api.js', 'js/app.js', 'manifest.webmanifest', 'icone/icona.svg', 'icone/icona-192.png'];
 
 self.addEventListener('install', (e) => {
