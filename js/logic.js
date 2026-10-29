@@ -5,8 +5,10 @@
 
   var MIN_GIOCATORI = 6;
   var GIORNI_CHIUSURA = 2; // si risponde fino a due giorni prima della data
-  var ORARI = { M: [10, 13], P: [15, 18] };
-  var FASCE = { M: 'Mattina', P: 'Pomeriggio' };
+  // Nel weekend mattina e pomeriggio, dal lunedì al venerdì solo la sera.
+  var ORARI = { M: [10, 13], P: [15, 18], S: [19, 21] };
+  var FASCE = { M: 'Mattina', P: 'Pomeriggio', S: 'Sera' };
+  var SETTIMANE_PRIMA = 1, SETTIMANE_DOPO = 2; // si vedono la settimana scorsa, questa e le due successive
   var GIORNI = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
   var GIORNI_LUNGHI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
   var MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
@@ -43,8 +45,26 @@
     }
     return out;
   }
+  // Settimane da lunedì a domenica, indicate con la data del lunedì.
+  function lunediDi(s) { return addDays(s, -((dow(s) + 6) % 7)); }
+  function settimana(s) {
+    var l = lunediDi(s), giorni = [];
+    for (var i = 0; i < 7; i++) giorni.push(addDays(l, i));
+    return { id: l, giorni: giorni };
+  }
+  function settimaneVisibili(oggi) {
+    var out = [], l = lunediDi(oggi);
+    for (var i = -SETTIMANE_PRIMA; i <= SETTIMANE_DOPO; i++) out.push(settimana(addDays(l, 7 * i)));
+    return out;
+  }
+  function etichettaSettimana(w) {
+    var a = parse(w.giorni[0]), b = parse(w.giorni[6]);
+    return a.getUTCDate() + (a.getUTCMonth() !== b.getUTCMonth() ? ' ' + MESI_BREVI[a.getUTCMonth()] : '') + '–' + b.getUTCDate() + ' ' + MESI_BREVI[b.getUTCMonth()];
+  }
+  function weekend(s) { var d = dow(s); return d === 0 || d === 6; }
+  function fasceDi(data) { return weekend(data) ? ['M', 'P'] : ['S']; }
   function slotId(data, fascia) { return data + '-' + fascia; }
-  function slotDi(data) { return [slotId(data, 'M'), slotId(data, 'P')]; }
+  function slotDi(data) { return fasceDi(data).map(function (f) { return slotId(data, f); }); }
   function dataDiSlot(id) { return id.slice(0, 10); }
   function fasciaDiSlot(id) { return id.slice(11); }
 
@@ -232,10 +252,11 @@
   function oraTesto(h) { return String(h).padStart(2, '0') + ':00'; }
 
   var L = {
-    MIN_GIOCATORI: MIN_GIOCATORI, GIORNI_CHIUSURA: GIORNI_CHIUSURA, ORARI: ORARI, FASCE: FASCE,
+    MIN_GIOCATORI: MIN_GIOCATORI, SETTIMANE_PRIMA: SETTIMANE_PRIMA, SETTIMANE_DOPO: SETTIMANE_DOPO, GIORNI_CHIUSURA: GIORNI_CHIUSURA, ORARI: ORARI, FASCE: FASCE,
     parse: parse, fmt: fmt, addDays: addDays, dow: dow, oggiLocale: oggiLocale, meseDi: meseDi, addMesi: addMesi,
     nomeMese: nomeMese, etichettaGiorno: etichettaGiorno, etichettaLunga: etichettaLunga, GIORNI: GIORNI, MESI_BREVI: MESI_BREVI,
-    weekendDelMese: weekendDelMese, slotId: slotId, slotDi: slotDi, dataDiSlot: dataDiSlot, fasciaDiSlot: fasciaDiSlot,
+    weekendDelMese: weekendDelMese, lunediDi: lunediDi, settimana: settimana, settimaneVisibili: settimaneVisibili,
+    etichettaSettimana: etichettaSettimana, weekend: weekend, fasceDi: fasceDi, GIORNI_LUNGHI: GIORNI_LUNGHI, slotId: slotId, slotDi: slotDi, dataDiSlot: dataDiSlot, fasciaDiSlot: fasciaDiSlot,
     pulisci: pulisci, chiavePersona: chiavePersona, maiuscola: maiuscola, nomeBreve: nomeBreve, nomeCompleto: nomeCompleto,
     chiusuraAuto: chiusuraAuto, iscrizioniAperte: iscrizioniAperte, riepilogoSlot: riepilogoSlot,
     numeroSquadreAuto: numeroSquadreAuto, squadre: squadre, lettera: lettera, girone: girone, eliminazione: eliminazione,

@@ -40,7 +40,7 @@
     var oggi = L.oggiLocale();
     var nomi = [['Giulia', 'Marino'], ['Paolo', 'Testa'], ['Sara', 'Leone'], ['Marco', 'Bianchi'], ['Elena', 'Ferri'], ['Luca', 'Dini'],
       ['Chiara', 'Villa'], ['Andrea', 'Pace'], ['Davide', 'Conti'], ['Marta', 'Gallo'], ['Fabio', 'Riva']];
-    var wk = L.weekendDelMese(L.meseDi(oggi)).concat(L.weekendDelMese(L.addMesi(L.meseDi(oggi), 1)))
+    var wk = L.settimaneVisibili(oggi).map(function (w) { return { giorni: w.giorni.slice(5) }; })
       .filter(function (w) { return w.giorni[1] >= oggi; }).slice(0, 3);
     var r = [];
     function add(slot, i, ruolo, extra) {
@@ -59,6 +59,10 @@
       [1, 2, 5, 6, 8].forEach(function (k) { add(s3, k, 'gioco'); });
       add(L.slotId(wk[1].giorni[1], 'P'), 9, 'gioco');
     }
+    // Una sera in settimana con qualche iscritto.
+    var sera = L.addDays(oggi, 3);
+    while (L.weekend(sera)) sera = L.addDays(sera, 1);
+    [0, 1, 4, 6].forEach(function (k) { add(L.slotId(sera, 'S'), k, 'gioco'); });
     var campi = [{ id: 'demo1', nome: 'Lido di prova', indirizzo: 'Via del Mare 1', campi: 2, costo: '20 €', tipo: 'outdoor', nota: 'Esempio: cambialo dall’area admin', mappa: '' }];
     var date = {};
     if (wk[0]) date[L.slotId(wk[0].giorni[0], 'M')] = { campo: 'demo1' };
