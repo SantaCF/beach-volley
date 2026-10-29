@@ -413,7 +413,28 @@
       '<div class="occhiello">' + L.FASCE[f] + ' · ' + esc(orario) + '</div>' +
       '<h1 class="titolo" style="font-size:52px">' + esc(L.etichettaGiorno(r.data)) + '</h1>' +
       '<div class="pills" style="margin-top:8px"><span class="pill arancio">' + esc(chip) + '</span></div>' + rete() + '</header>' +
-      '<main style="padding-top:10px">' + tabs + '<div class="colonne">' + htmlCampo + blocchiPartita(r, campo) + '</div></main>' + barra('w');
+      '<main style="padding-top:10px">' + tabs + '<div class="colonne">' + htmlCampo + bloccoCalendario(r, campo) + blocchiPartita(r, campo) + '</div></main>' + barra('w');
+  }
+
+  // Salvataggio nel calendario del telefono: solo per partite confermate, con orario deciso dall'organizzatore.
+  function bloccoCalendario(r, campo) {
+    if (r.stato !== 'sigioca') return '';
+    if (!r.orario) return '<div class="card stretta"><strong>Aggiungi al calendario</strong><span class="piccolo">Potrai salvarla nel calendario quando l’organizzatore conferma l’orario.</span></div>';
+    var giorno = r.data.replace(/-/g, '');
+    var ora = function (h) { return giorno + 'T' + String(h).padStart(2, '0') + '0000'; };
+    var titolo = 'Beach volley tra colleghi';
+    var luogo = campo ? campo.nome + (campo.indirizzo ? ', ' + campo.indirizzo : '') : '';
+    var nota = 'Dettagli e squadre: ' + linkApp() + '#data/' + r.id;
+    var pulisciIcs = function (t) { return String(t).replace(/[\\,;]/g, '\\$&').replace(/\n/g, '\\n'); };
+    var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Beach volley tra colleghi//IT', 'BEGIN:VEVENT',
+      'UID:' + r.id + '@beach-volley', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+      'DTSTART:' + ora(r.orario[0]), 'DTEND:' + ora(r.orario[1]), 'SUMMARY:' + pulisciIcs(titolo),
+      luogo ? 'LOCATION:' + pulisciIcs(luogo) : '', 'DESCRIPTION:' + pulisciIcs(nota), 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
+    var google = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(titolo) +
+      '&dates=' + ora(r.orario[0]) + '/' + ora(r.orario[1]) + '&ctz=Europe/Rome&details=' + encodeURIComponent(nota) + (luogo ? '&location=' + encodeURIComponent(luogo) : '');
+    return '<div class="card stretta"><strong>Aggiungi al calendario</strong><span class="piccolo">Se vuoi, salva la partita nel calendario del telefono.</span>' +
+      '<div class="scelte due" style="margin-top:6px"><a class="btn mini" download="beach-volley-' + r.data + '.ics" href="data:text/calendar;charset=utf-8,' + encodeURIComponent(ics) + '">' + I.cal + 'iPhone / altro</a>' +
+      '<a class="btn mini" target="_blank" rel="noopener" href="' + esc(google) + '">' + I.cal + 'Google Calendar</a></div></div>';
   }
 
   function graficoOre(giocatori) {
