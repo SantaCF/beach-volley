@@ -173,7 +173,7 @@
   function barra(attiva) {
     return '<div class="piede">' + barraConferma() + '<nav class="barra" aria-label="Sezioni">' +
       '<a href="#disponibilita"' + (attiva === 'd' ? ' aria-current="page"' : '') + '>' + I.lista + 'Disponibilità</a>' +
-      '<a href="#weekend"' + (attiva === 'w' ? ' aria-current="page"' : '') + '>' + I.cal + 'Partite</a></nav></div>';
+      '<a href="#weekend"' + (attiva === 'w' ? ' aria-current="page"' : '') + '>' + I.cal + 'Calendario</a></nav></div>';
   }
 
   function bottoneInfo() {
@@ -184,7 +184,7 @@
       ['Segna quando ci sei', 'Per ogni giorno scegli <b>Gioco</b>, <b>Guardo</b>, <b>Post</b> (vieni solo al post-partita) o <b>No</b>. Vedi sempre questa settimana e le due successive.'],
       ['L’orario è indicativo', 'Se giochi ti proponiamo una fascia di massima: nel weekend mattina 10–13 e pomeriggio 15–18, in settimana la sera 19–21. Se puoi solo in certe ore tocca <b>Cambia orario</b> e indica dalle/alle: l’organizzatore vede gli orari di tutti e sceglie quello che va bene ai più.'],
       ['Premi Conferma', 'Le scelte partono solo quando premi il tasto arancione <b>Conferma</b> in basso. Puoi cambiare idea quando vuoi, fino a due giorni prima della data.'],
-      ['Si gioca da 6 in su', 'Quando una data arriva ad almeno 6 giocatori diventa arancione nella sezione <b>Partite</b>: lì trovi chi c’è, le squadre proposte e il campo.'],
+      ['Si gioca da 6 in su', 'Quando una data arriva ad almeno 6 giocatori diventa arancione nella sezione <b>Calendario</b>: lì trovi chi c’è, le squadre proposte e il campo.'],
       ['Conferme nel gruppo', 'Orario definitivo e campo li conferma l’organizzatore: li vedi nella data e arrivano anche nel gruppo WhatsApp.']
     ];
     return '<div class="info-velo" data-a="chiudiInfo"></div><section class="info-foglio" role="dialog" aria-modal="true" aria-labelledby="info-titolo">' +
@@ -224,7 +224,7 @@
     return '<div class="nav-mese"><button class="tondo" aria-label="Settimana precedente" data-a="' + azione + '" data-v="-1"' + (prima ? '' : ' disabled') + '>' + I.sx + '</button>' +
       '<button class="tondo" aria-label="Settimana successiva" data-a="' + azione + '" data-v="1"' + (dopo ? '' : ' disabled') + '>' + I.dx + '</button></div>';
   }
-  var NOMI_SETTIMANE = ['Scorsa', 'Questa', 'Prossima', 'Tra 2'];
+  var NOMI_SETTIMANE = ['Scorsa', 'Questa', 'Prossima', ''];
 
   // Un giorno è "da fare" se ha fasce aperte e non ho risposto a nessuna.
   function giornoDaFare(g) {
@@ -243,7 +243,7 @@
       var passato = x.giorni[6] < o, daFare = !passato && settimanaDaFare(x);
       var d1 = L.parse(x.giorni[0]).getUTCDate(), d2 = L.parse(x.giorni[6]).getUTCDate();
       return '<button class="chip-wk' + (daFare ? ' dafare' : '') + (passato ? ' passato' : '') + '" aria-pressed="' + (x.id === S.wk) + '" data-a="wk" data-v="' + x.id + '">' +
-        '<i>' + NOMI_SETTIMANE[i] + '</i><b>' + d1 + '–' + d2 + '</b><span>' + (passato ? 'passata' : daFare ? 'da fare' : 'fatto') + '</span></button>';
+        '<i>' + (NOMI_SETTIMANE[i] || '&nbsp;') + '</i><b>' + d1 + '–' + d2 + '</b><span>' + (passato ? 'passata' : daFare ? 'da fare' : 'fatto') + '</span></button>';
     }).join('');
 
     var stato = { bozza: 'Da confermare', invio: 'Invio…', salvato: I.check + 'Inviato', errore: 'Non inviato' }[S.salvataggio] || '';
@@ -324,7 +324,7 @@
   var ETICHETTE = { sigioca: 'Si gioca', votazione: 'In votazione', nonsigioca: 'Non si gioca', annullata: 'Annullata', giocata: 'Giocata', saltata: 'Non si è giocato' };
   var RUOLO_TESTO = { gioco: 'Gioco', guardo: 'Guardo', post: 'Post', no: 'No' };
 
-  var ETICHETTE_SETTIMANE = ['Settimana scorsa', 'Questa settimana', 'Settimana prossima', 'Tra due settimane'];
+  var ETICHETTE_SETTIMANE = ['Settimana scorsa', 'Questa settimana', 'Settimana prossima', ''];
   function vistaWeekend() {
     var o = oggi();
     var ws = L.settimaneVisibili(o);
@@ -336,7 +336,7 @@
     // Prima le settimane in arrivo, la scorsa in fondo.
     var ordine = ws.map(function (w, i) { return [w, i]; }).slice(L.SETTIMANE_PRIMA).concat(ws.slice(0, L.SETTIMANE_PRIMA).map(function (w, i) { return [w, i]; }));
     var schede = ordine.map(function (x) { return schedaSettimana(x[0], ETICHETTE_SETTIMANE[x[1]]); }).join('');
-    return '<header class="testata mare">' + I.palla + '<div class="occhiello">Le partite</div>' +
+    return '<header class="testata mare">' + I.palla + '<div class="occhiello">Calendario</div>' +
       '<h1 class="titolo">Le prossime<br>settimane</h1>' +
       '<div class="pills">' + bottoneInfo() + '<span class="pill piena">' + (conf ? plur(conf, 'partita confermata', 'partite confermate') : 'Nessuna partita ancora confermata') + '</span>' +
       (daFare ? '<a class="pill vuota" href="#disponibilita" style="text-decoration:none">Ti ' + (daFare === 1 ? 'manca 1 settimana' : 'mancano ' + daFare + ' settimane') + '</a>' : '') + '</div>' +
@@ -379,13 +379,13 @@
     var sere = w.giorni.slice(0, 5).filter(function (g) {
       return L.slotDi(g).some(function (s) { return riep(s).giocatori.length || mia(s).ruolo; });
     });
-    var righe = w.giorni.slice(5).map(rigaGiorno).join('');
-    righe += '<span class="wk-sezione">In settimana, la sera</span>' +
-      (sere.length ? sere.map(rigaGiorno).join('') : '<span class="wk-vuoto">Ancora nessuno per le sere di questa settimana.</span>');
+    var righe = '<span class="wk-sezione">In settimana, la sera</span>' +
+      (sere.length ? sere.map(rigaGiorno).join('') : '<span class="wk-vuoto">Ancora nessuno per le sere di questa settimana.</span>') +
+      '<span class="wk-sezione">Weekend</span>' + w.giorni.slice(5).map(rigaGiorno).join('');
     var apribile = rs.some(function (r) { return r.aperte; });
     var conDettaglio = rs.filter(function (r) { return r.stato === 'sigioca' || r.stato === 'giocata'; }).sort(function (x, y) { return y.giocatori.length - x.giocatori.length; })[0];
-    return '<section class="wk"><div class="wk-testa ' + kind + '"><span class="t"><small>' + esc(etichetta) + '</small>' + esc(L.etichettaSettimana(w)) + '</span><span class="pill">' + esc(stato) + '</span></div>' +
-      '<div class="wk-corpo"><span class="wk-sezione">Weekend</span>' + righe + '<div class="wk-piede"><a href="#disponibilita/' + w.id + '">' + I.matita + (apribile ? (settimanaDaFare(w) ? 'Rispondi' : 'Modifica') : 'Le mie risposte') + '</a>' +
+    return '<section class="wk"><div class="wk-testa ' + kind + '"><span class="t">' + (etichetta ? '<small>' + esc(etichetta) + '</small>' : '') + esc(L.etichettaSettimana(w)) + '</span><span class="pill">' + esc(stato) + '</span></div>' +
+      '<div class="wk-corpo">' + righe + '<div class="wk-piede"><a href="#disponibilita/' + w.id + '">' + I.matita + (apribile ? (settimanaDaFare(w) ? 'Rispondi' : 'Modifica') : 'Le mie risposte') + '</a>' +
       (conDettaglio ? '<a href="#data/' + conDettaglio.id + '" style="color:#0F5F63">Squadre e campo' + I.dx + '</a>' : '') + '</div></div></section>';
   }
 
@@ -409,7 +409,7 @@
       '<a class="piccolo" style="font-weight:700;min-height:44px;display:flex;align-items:center" target="_blank" rel="noopener" href="' + esc(campo.mappa || ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(campo.nome + ' ' + campo.indirizzo))) + '">Mappa</a></div>' :
       '<div class="card campo">' + I.pin + '<span class="c"><strong>Campo da decidere</strong><span class="piccolo">Lo sceglie l’organizzatore quando la data è confermata.</span></span></div>';
 
-    return '<header class="testata mare"><a class="indietro" href="#weekend">' + I.sx + 'Partite</a>' +
+    return '<header class="testata mare"><a class="indietro" href="#weekend">' + I.sx + 'Calendario</a>' +
       '<div class="occhiello">' + L.FASCE[f] + ' · ' + esc(orario) + '</div>' +
       '<h1 class="titolo" style="font-size:52px">' + esc(L.etichettaGiorno(r.data)) + '</h1>' +
       '<div class="pills" style="margin-top:8px"><span class="pill arancio">' + esc(chip) + '</span></div>' + rete() + '</header>' +
