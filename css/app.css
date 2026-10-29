@@ -99,6 +99,7 @@ main { flex: 1; padding: 4px 16px 24px; display: flex; flex-direction: column; g
 .chip-wk { min-height: 54px; border-radius: 14px; border: 2px solid var(--bordo); background: var(--carta); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; color: var(--inchiostro); }
 .chip-wk b { font-family: var(--display); font-weight: 400; font-size: 18px; }
 .chip-wk span { font-size: 11px; font-weight: 700; }
+.chip-wk i { font-style: normal; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; opacity: .75; }
 .chip-wk.dafare { border-style: dashed; border-color: var(--arancio-testo); color: var(--arancio-testo); background: transparent; }
 .chip-wk.passato { opacity: .55; }
 .chip-wk[aria-pressed="true"] { background: var(--inchiostro); border: 2px solid var(--inchiostro); color: var(--crema); opacity: 1; }
@@ -214,7 +215,7 @@ body.in-admin { background: var(--notte); }
 .admin .ore .bar { background: #3A5566; } .admin .ore .bar.top { background: #F59E6B; }
 .admin .ore .v, .admin .ore-assi span { color: #C9BBA5; }
 .admin .avviso { background: #3D3418; color: #FCE9A8; }
-.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: var(--notte-2); border-radius: 14px; padding: 4px; }
+.tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; background: var(--notte-2); border-radius: 14px; padding: 4px; }
 .tabs button { min-height: 42px; border-radius: 10px; border: 0; background: transparent; color: var(--sabbia); font-weight: 700; font-size: 14px; }
 .tabs button[aria-pressed="true"] { background: var(--sabbia); color: var(--notte); }
 .slot-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
@@ -242,3 +243,56 @@ body.in-admin { background: var(--notte); }
 .info-passi { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
 .info-passi li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
 .info-n { flex: 0 0 32px; height: 32px; border-radius: 16px; background: var(--arancio); color: #fff; font-family: var(--display); font-size: 18px; display: flex; align-items: center; justify-content: center; }
+
+/* ---- Settimane ---- */
+.gruppo { display: flex; flex-direction: column; gap: 10px; }
+.gruppo-testa { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-top: 4px; border-top: 2px solid var(--bordo); padding-top: 10px; }
+.griglia-giorni, .griglia-wk, .colonne { display: flex; flex-direction: column; gap: 14px; }
+.giorno-passato { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 10px; padding: 10px 14px; background: transparent; box-shadow: none; border: 2px dashed var(--bordo); text-decoration: none; color: var(--grigio); }
+.giorno-passato .d { font-family: var(--display); font-size: 18px; text-transform: uppercase; }
+.wk-testa .t small { display: block; font-family: var(--testo); font-size: 11px; font-weight: 700; letter-spacing: .1em; opacity: .8; margin-bottom: 2px; }
+.wk-sezione { display: block; padding: 12px 0 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--grigio); }
+.wk-vuoto { display: block; padding: 8px 0 10px; font-size: 13px; color: var(--grigio); border-bottom: 1px solid #EFE5D4; }
+.wk-riga .g { display: flex; flex-direction: column; line-height: 1.1; }
+.wk-riga .g b { font-family: var(--display); font-weight: 400; font-size: 20px; color: var(--inchiostro); }
+.wk-riga.gioca .g b { color: var(--arancio-testo); }
+.deco { display: none; }
+
+/* ---- Computer: si usa tutta la larghezza, il telefono resta com'è ---- */
+@media (min-width: 900px) {
+  body { background: linear-gradient(180deg, #0F5F63 0, #0F5F63 260px, #1A7A7E 260px, #1A7A7E 268px, var(--sabbia-2) 268px); min-height: 100vh; }
+  body.in-admin { background: var(--notte); }
+  .deco { display: block; position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .deco svg { position: absolute; }
+  .deco .sole { left: -80px; top: -80px; width: 300px; height: 300px; }
+  .deco .palla-d { right: -90px; bottom: 60px; width: 340px; height: 340px; transform: rotate(-18deg); }
+  .deco .palme { left: -20px; bottom: 0; width: 260px; height: 420px; }
+  .deco .orme { right: 40px; top: 300px; width: 120px; height: 260px; }
+  body.in-admin .deco { display: none; }
+  #app { position: relative; z-index: 1; max-width: 1120px; margin: 32px auto 0; min-height: calc(100vh - 32px); border-radius: 28px 28px 0 0; overflow: clip; box-shadow: 0 20px 60px rgba(15,95,99,.25); }
+  #app.admin { max-width: 880px; box-shadow: none; }
+  .testata { padding: 40px 56px 20px; }
+  .testata .palla { width: 360px; height: 360px; right: -60px; top: -90px; }
+  .titolo { font-size: 84px; }
+  .benvenuto .titolo { font-size: 96px; }
+  .benvenuto .testata { padding-top: 64px; }
+  .benvenuto main { max-width: 480px; width: 100%; margin: 0 auto; }
+  .rete { width: calc(100% + 112px); margin: 18px -56px -20px; height: 60px; }
+  main { padding: 8px 56px 40px; gap: 18px; }
+  .weekend-chips { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 640px; }
+  .chip-wk { min-height: 66px; }
+  .chip-wk b { font-size: 22px; }
+  .griglia-giorni { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .griglia-giorni.feriali { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .griglia-wk { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+  .colonne { display: block; columns: 2; column-gap: 20px; }
+  .colonne > * { break-inside: avoid; margin-bottom: 18px; }
+  .colonne > .riga { break-after: avoid; }
+  .tabs-fascia { max-width: 520px; }
+  .piede { pointer-events: none; }
+  .piede > * { pointer-events: auto; }
+  .barra { max-width: 520px; margin: 0 auto; border-radius: 20px 20px 0 0; border: 1px solid var(--sabbia-2); border-bottom: 0; box-shadow: 0 -8px 24px rgba(27,27,31,.08); }
+  .conferma { max-width: 640px; margin: 0 auto 8px; border: 2px solid var(--arancio); border-radius: 18px; box-shadow: 0 8px 24px rgba(232,87,42,.25); }
+  .info-foglio { top: 50%; bottom: auto; transform: translate(-50%, -50%); max-width: 600px; max-height: 88vh; border-radius: 24px; padding: 28px; }
+  .admin .testata-admin, .admin main { padding-left: 40px; padding-right: 40px; }
+}

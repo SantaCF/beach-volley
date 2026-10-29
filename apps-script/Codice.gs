@@ -144,7 +144,7 @@ function chiave(nome, cognome) {
     .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
-function slotValido(s) { return /^\d{4}-\d{2}-\d{2}-(M|P)$/.test(String(s)); }
+function slotValido(s) { return /^\d{4}-\d{2}-\d{2}-(M|P|S)$/.test(String(s)); }
 function ora(v) { if (v === null || v === undefined || v === '') return ''; const n = Math.round(+v); return n >= 6 && n <= 23 ? n : ''; }
 
 // ---------- Scrittura giocatore ----------
