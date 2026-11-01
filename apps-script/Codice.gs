@@ -8,7 +8,7 @@
 const PIN_ADMIN = 'CAMBIAMI';
 
 const FUSO = 'Europe/Rome';
-const GIORNI_CHIUSURA = 2;
+const GIORNI_CHIUSURA = 0; // 0 = si risponde fino al giorno stesso
 const RUOLI = ['gioco', 'guardo', 'post', 'no'];
 const FOGLI = {
   Risposte: ['slot', 'persona', 'nome', 'cognome', 'ruolo', 'accompagnatori', 'dalle', 'alle', 'aggiornato'],

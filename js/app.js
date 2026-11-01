@@ -183,7 +183,7 @@
     var passi = [
       ['Segna quando ci sei', 'Per ogni giorno scegli <b>Gioco</b>, <b>Guardo</b>, <b>Post</b> (vieni solo al post-partita) o <b>No</b>. Vedi sempre questa settimana e le due successive.'],
       ['L’orario è indicativo', 'Se giochi ti proponiamo una fascia di massima: nel weekend mattina 10–13 e pomeriggio 15–18, in settimana la sera 19–21. Se puoi solo in certe ore tocca <b>Cambia orario</b> e indica dalle/alle: l’organizzatore vede gli orari di tutti e sceglie quello che va bene ai più.'],
-      ['Premi Conferma', 'Le scelte partono solo quando premi il tasto arancione <b>Conferma</b> in basso. Puoi cambiare idea quando vuoi, fino a due giorni prima della data.'],
+      ['Premi Conferma', 'Le scelte partono solo quando premi il tasto arancione <b>Conferma</b> in basso. Puoi cambiare idea quando vuoi, fino al giorno della partita.'],
       ['Si gioca da 6 in su', 'Quando una data arriva ad almeno 6 giocatori diventa arancione nella sezione <b>Calendario</b>: lì trovi chi c’è, le squadre proposte e il campo.'],
       ['Conferme nel gruppo', 'Orario definitivo e campo li conferma l’organizzatore: li vedi nella data e arrivano anche nel gruppo WhatsApp.']
     ];
@@ -262,7 +262,7 @@
       '<div class="gruppo"><div class="gruppo-testa"><span class="etichetta">Weekend</span><span class="piccolo">mattina 10–13 · pomeriggio 15–18</span></div>' +
       (weekendAperto ? '<button class="btn largo" data-a="tutto" data-v="' + w.id + '">Ci sono tutto il weekend</button>' : '') +
       '<div class="griglia-giorni">' + festivi.map(cardGiorno).join('') + '</div></div>' +
-      '<p class="piccolo" style="margin:0">Gli orari sono indicativi: quello preciso si decide nel gruppo. Si risponde fino a due giorni prima di ogni data.</p>' +
+      '<p class="piccolo" style="margin:0">Gli orari sono indicativi: quello preciso si decide nel gruppo. Puoi rispondere e cambiare idea fino al giorno stesso.</p>' +
       '</main>' + barra('d');
   }
 
@@ -275,8 +275,7 @@
       return '<a class="card giorno-passato" href="#data/' + slots[0] + '"><span class="d">' + esc(L.etichettaGiorno(g)) + '</span><span class="piccolo">passato · ' + plur(tot, 'giocatore', 'giocatori') + '</span></a>';
     }
     var aperte = rs.some(function (r) { return r.aperte; });
-    var chiusura = rs[0].chiusura;
-    var nota = aperte ? (chiusura ? 'rispondi entro ' + L.etichettaGiorno(chiusura).toLowerCase() : 'iscrizioni aperte') : (g < oggi() ? 'giornata passata' : 'iscrizioni chiuse');
+    var nota = aperte ? 'iscrizioni aperte' : (g < oggi() ? 'giornata passata' : 'iscrizioni chiuse');
     var fasce = slots.map(function (s, i) { return fascia(s, rs[i]); }).join('');
     var miei = slots.map(mia);
     var conMe = miei.some(function (m) { return m.ruolo && m.ruolo !== 'no'; });
@@ -351,8 +350,8 @@
     var main = n ? L.FASCE[best.fascia] + ' · ' + plur(n, 'gioca', 'giocano') : 'Ancora nessuno';
     var sub;
     if (best.stato === 'annullata') sub = 'annullata';
-    else if (best.stato === 'sigioca') sub = best.aperte ? 'si risponde fino a ' + L.etichettaGiorno(best.chiusura).toLowerCase() : 'iscrizioni chiuse';
-    else if (best.stato === 'votazione') sub = (n ? 'mancano ' + best.mancano + ' per giocare · ' : '') + (best.chiusura ? 'chiude ' + L.etichettaGiorno(best.chiusura).toLowerCase() : 'iscrizioni aperte');
+    else if (best.stato === 'sigioca') sub = best.aperte ? 'iscrizioni aperte' : 'iscrizioni chiuse';
+    else if (best.stato === 'votazione') sub = (n ? 'mancano ' + best.mancano + ' per giocare · ' : '') + 'iscrizioni aperte';
     else sub = ETICHETTE[best.stato].toLowerCase();
     altri.forEach(function (r) { sub += ' · ' + L.FASCE[r.fascia].toLowerCase() + ' ' + r.giocatori.length; });
     var miei = rs.map(function (r) { return mia(r.id); });
@@ -529,9 +528,9 @@
     var campo = campoDi(r.campo);
     out += '<div class="riga"><h1 class="titolo medio">' + esc(L.etichettaGiorno(r.data)) + '</h1><span class="piccolo">' + L.FASCE[r.fascia].toLowerCase() + ' · ' + plur(r.giocatori.length, 'gioca', 'giocano') + '</span></div>';
 
-    var modo = im.iscrizioni || 'auto';
-    out += '<div class="card"><div class="riga"><span><strong>Iscrizioni ' + (r.aperte ? 'aperte' : 'chiuse') + '</strong><br><span class="piccolo">Chiusura automatica: ' + esc(L.etichettaGiorno(L.chiusuraAuto(r.data)).toLowerCase()) + '</span></span></div>' +
-      '<div class="scelte tre" role="group" aria-label="Iscrizioni">' + [['auto', 'Automatica'], ['chiuse', 'Chiudi ora'], ['aperte', 'Tieni aperte']].map(function (o) {
+    var modo = im.iscrizioni === 'chiuse' ? 'chiuse' : 'auto';
+    out += '<div class="card"><div class="riga"><span><strong>Iscrizioni ' + (r.aperte ? 'aperte' : 'chiuse') + '</strong><br><span class="piccolo">' + (r.aperte ? 'Restano aperte fino al giorno stesso, a meno che tu non le chiuda' : 'Chiuse: i colleghi non possono più cambiare risposta') + '</span></span></div>' +
+      '<div class="scelte due" role="group" aria-label="Iscrizioni">' + [['auto', 'Aperte'], ['chiuse', 'Chiuse']].map(function (o) {
         return '<button class="scelta" aria-pressed="' + (modo === o[0]) + '" data-a="iscrizioni" data-v="' + o[0] + '">' + o[1] + '</button>';
       }).join('') + '</div>' +
       '<button class="btn ' + (im.annullata ? 'pieno' : 'pericolo') + ' mini" data-a="annulla">' + (im.annullata ? 'Ripristina la data' : 'Annulla questa data') + '</button></div>';
@@ -599,15 +598,15 @@
       return 'Beach volley tra colleghi\nSi gioca ' + quando + ', ' + orario + '.\n' +
         (campo ? 'Campo: ' + campo.nome + (campo.indirizzo ? ', ' + campo.indirizzo : '') + '\n' : 'Campo: da decidere\n') +
         'Siamo in ' + r.giocatori.length + ' a giocare' + (sq.squadre.length > 1 ? ', ' + sq.squadre.length + ' squadre' : '') + (r.guardano.length ? ' e ' + r.guardano.length + ' a guardare' : '') + '.\n' +
-        (r.aperte ? 'Chi vuole aggiungersi ha tempo fino a ' + L.etichettaLunga(r.chiusura || r.data) + '.\n' : '') +
+        (r.aperte ? 'Chi vuole aggiungersi può ancora segnarsi nell’app.\n' : '') +
         'Squadre e dettagli: ' + link;
     }
     return 'Beach volley: per ' + quando + ' siamo in ' + r.giocatori.length + ', ne mancano ' + r.mancano + ' per giocare.\n' +
-      (r.aperte && r.chiusura ? 'Se ci sei segnalo nell’app entro ' + L.etichettaLunga(r.chiusura) + ': ' : 'Disponibilità nell’app: ') + linkApp() + '#disponibilita/' + r.data;
+      (r.aperte ? 'Se ci sei segnalo nell’app: ' : 'Disponibilità nell’app: ') + linkApp() + '#disponibilita/' + r.data;
   }
   function messaggioAnnuncio() {
     return 'Beach volley tra colleghi\nSono aperte le disponibilità per le prossime settimane: weekend (mattina e pomeriggio) e serate in settimana (19–21).\nSegna quando ci sei, ci vuole un minuto: ' + linkApp() +
-      '\nSi risponde fino a due giorni prima di ogni data e puoi cambiare idea quando vuoi.';
+      '\nPuoi cambiare idea quando vuoi, fino al giorno stesso.';
   }
 
   function adminCampi() {
@@ -700,7 +699,7 @@
     esciAdmin: function () { S.pin = null; scriviSessione('bv-pin', null); vai('#disponibilita'); },
     wkAdmin: function (d) { S.wkAdmin = L.addDays(S.wkAdmin, 7 * d.v); S.slotAdmin = null; S.sposta = false; render(); },
     slotAdmin: function (d) { S.slotAdmin = d.v; S.sposta = false; render(); },
-    iscrizioni: function (d) { impostaData({ iscrizioni: d.v === 'auto' ? null : d.v }, d.v === 'chiuse' ? 'Iscrizioni chiuse' : d.v === 'aperte' ? 'Iscrizioni tenute aperte' : 'Chiusura automatica'); },
+    iscrizioni: function (d) { impostaData({ iscrizioni: d.v === 'auto' ? null : d.v }, d.v === 'chiuse' ? 'Iscrizioni chiuse' : 'Iscrizioni aperte'); },
     annulla: function () {
       var im = imp(S.slotAdmin);
       if (!im.annullata && !confirm('Annullare questa data? I colleghi la vedranno come annullata.')) return;
