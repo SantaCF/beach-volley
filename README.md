@@ -5,7 +5,7 @@ App web (installabile sul telefono) per organizzare le partite di beach volley t
 - **Giocatori**: scrivono nome e cognome una volta sola, segnano per ogni weekend se giocano, guardano o vengono solo al post-partita, e possono cambiare idea quando vogliono. Vedono i weekend, chi c'è, le squadre proposte e il campo.
 - **Admin** (con PIN): chiude o riapre le iscrizioni, annulla una data, sceglie campo e orario, numero di squadre e giocatori per squadra, girone o eliminazione diretta, sposta i giocatori, gestisce la scheda campi, cancella risposte e copia i messaggi pronti per WhatsApp.
 
-Regole: si gioca con almeno 6 giocatori; si risponde fino a due giorni prima di ogni data; le squadre restano uguali finché non cambiano gli iscritti. Nessuna mail né telefono.
+Regole: si gioca con almeno 6 giocatori; si risponde fino al giorno stesso (l'admin può chiudere a mano); le squadre restano uguali finché non cambiano gli iscritti. Nessuna mail né telefono.
 
 ## Come è fatta
 
